@@ -1,9 +1,9 @@
 import json
 from typing import List, Dict
 from pathlib import Path
-
 from models import Car, CarFullInfo, CarStatus, Model, ModelSaleStats, Sale
-
+from decimal import Decimal
+from datetime import datetime
 
 class CarService:
     def __init__(self, root_directory_path: str) -> None:
@@ -30,74 +30,52 @@ class CarService:
 
     def _add_to_file(self, data_file: Path, index_file: Path, data: Dict, key: str) -> None:
         index_data = self._read_index(index_file)
-        data_str = json.dumps(data)
+        data_str = json.dumps(data, default=str)  # Преобразование всех объектов в строки
         with open(data_file, "a", encoding="utf-8") as f:
             f.write(data_str.ljust(500) + "\n")
         index_data.append({key: len(index_data)})
         self._write_index(index_file, index_data)
 
     def add_model(self, model: Model) -> Model:
-    # Преобразуем модель в словарь
+        # Преобразуем модель в словарь
         model_data = model.dict()
-    
-    # Открываем файл models.txt для добавления данных
+
+        # Открываем файл models.txt для добавления данных
         with open(self.models_file, "a", encoding="utf-8") as f:
-        # Записываем данные модели в формате JSON, дополняя строку до 500 символов
-            f.write(json.dumps(model_data).ljust(500) + "\n")
-    
-    # Читаем текущий индекс
+            # Записываем данные модели в формате JSON, дополняя строку до 500 символов
+            f.write(json.dumps(model_data, default=str).ljust(500) + "\n")
+
+        # Читаем текущий индекс
         index_data = self._read_index(self.models_index_file)
-    
-    # Добавляем новую запись в индекс
+
+        # Добавляем новую запись в индекс
         index_data.append({"id": str(model.id), "position": len(index_data)})
-    
-    # Записываем обновленный индекс в файл
+
+        # Записываем обновленный индекс в файл
         self._write_index(self.models_index_file, index_data)
-    
+
         return model
 
     def add_car(self, car: Car) -> Car:
-    """
-    Adds a new car to the cars file and updates the index.
-
-    Parameters:
-        car (Car): The Car object to be added.
-
-    Returns:
-        Car: The Car object that was added.
-    """
-    # Convert the car object to a dictionary
+        # Преобразуем объект Car в словарь
         car_data = car.dict()
 
-    # Append the car data to the cars file
+        # Добавляем данные автомобиля в файл cars.txt
         with open(self.cars_file, "a", encoding="utf-8") as f:
-        # Write the JSON representation of the car data, padded to 500 characters
-            f.write(json.dumps(car_data).ljust(500) + "\n")
+            # Записываем JSON-представление данных автомобиля, дополняя строку до 500 символов
+            f.write(json.dumps(car_data, default=str).ljust(500) + "\n")
 
-    # Read the current index data from the index file
+        # Читаем текущие данные индекса из файла индекса
         index_data = self._read_index(self.cars_index_file)
 
-    # Add a new entry to the index for this car
+        # Добавляем новую запись в индекс для этого автомобиля
         index_entry = {"vin": car.vin, "position": len(index_data)}
         index_data.append(index_entry)
 
-    # Write the updated index back to the index file
+        # Записываем обновленный индекс обратно в файл индекса
         self._write_index(self.cars_index_file, index_data)
 
-
         return car
-
-
-
-
-
-
-
-
-
-
-
-
 
     # Задание 2. Сохранение продаж.
     def sell_car(self, sale: Sale) -> Car:
@@ -113,12 +91,4 @@ class CarService:
 
     # Задание 5. Обновление ключевого поля
     def update_vin(self, vin: str, new_vin: str) -> Car:
-        raise NotImplementedError
-
-    # Задание 6. Удаление продажи
-    def revert_sale(self, sales_number: str) -> Car:
-        raise NotImplementedError
-
-    # Задание 7. Самые продаваемые модели
-    def top_models_by_sales(self) -> list[ModelSaleStats]:
-        raise NotImplementedError
+        raise NotImplemented
